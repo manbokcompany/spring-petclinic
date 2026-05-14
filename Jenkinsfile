@@ -29,15 +29,19 @@ pipeline {
         // Docker 이미지 생성
         stage('Docker Build') {
             steps {
-                sh 'docker build -t spring-petclinic:${BUILD_NUMBER} .'
-                sh 'docker tag spring-petclinic:${BUILD_NUMBER} s4616/spring-petclinic:latest'
+                sh '''
+                docker build -t spring-petclinic:${BUILD_NUMBER} .
+                docker tag spring-petclinic:${BUILD_NUMBER} s4616/spring-petclinic:latest
+                '''
             }
         }
         // Docker 이미지를 Docker Hub로 Push
         stage('Docker Push') {
             steps {
-                sh 'echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin'
-                sh 'docker push s4616/spring-petclinic:latest'
+                sh '''
+                echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin
+                docker push s4616/spring-petclinic:latest
+                '''
             }
         }
         // Docker 이미지 삭제
