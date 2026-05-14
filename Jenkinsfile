@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK21"
+        jdk 'JDK21'
         mavem 'M3'
     }
     
@@ -17,7 +17,7 @@ pipeline {
         }
 
         // Maven으로 Build
-        stage(Maven Build') {
+        stage('Maven Build') {
                 steps {
                     sh 'mvn -Dmaven.test.failure.ignore=true clean package'
             }
