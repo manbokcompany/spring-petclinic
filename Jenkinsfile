@@ -5,7 +5,10 @@ pipeline {
         jdk 'JDK21'
         maven 'M3'
     }
-    
+
+    enviroment {
+        DOCKERHUB_CRED = credentials('dockerCredential')
+    }
     stages {
         // Github에서 소스코드 가져오기
         stage('Git Clone') {
@@ -23,18 +26,39 @@ pipeline {
             }
         }
         //Docker 이미지 생성
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t spring-petclinic:${BUILD_NUMBER} .'
+                sh 'docker tag spring-petclinic:${BUILD_NUMBER} manbokcompany/spring-petclinic:latest'
+            }
+        }
         //Docker 이미지를 Docker Bub로 Push
+        stage('Docker Push') {
+            steps {
+                sh 'echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USER} --password-stdin'
+                sh 'docker push manbokcompany/spring-petclinic:latest'
+            }
+        }
         //Docker 이미지 삭제
-
+        stage('Docker Clean') {
+            step {
+                sh '''
+                docker rmi spring-petclinic:${BUILD_NUMBER}
+                docker rmi manbokcompany spring-petclinic:latest
+                '''
+            }
+        }
         //Docker Hub로 이용한 배포
-        stage('SSH Publish') {
+        stage('Docker Deploy') {
             steps {
                 sshPublisher(publishers: [sshPublisherDesc(configName: 'target', 
-                transfers: [sshTransfer(cleanRemote: false, excludes: '', 
-                execCommand: '''fuser -k 8080/tcp
-                export BUILD_ID=Spring-PetClinic
-                
-                nohup java -jar /home/ubuntu/spring-petclinic-4.0.0-SNAPSHOT.jar >> nohup.out 2>&1 &''', 
+                transfers: [sshTransfer(cleanRemote: false, 
+                excludes: '', 
+                execCommand: '''
+                docker rm -f $(docker ps -aq)
+                docker rmi $(docker images -q)
+                docker run -itd -p 80:8080 --name=spring-petclinic manbokcompany/spring-petclinic:latest             
+                ''', 
                 execTimeout: 120000,
                 flatten: false, 
                 makeEmptyDirs: false, 
