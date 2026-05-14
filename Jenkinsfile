@@ -41,7 +41,7 @@ pipeline {
         }
         //Docker 이미지 삭제
         stage('Docker Clean') {
-            step {
+            steps {
                 sh '''
                 docker rmi spring-petclinic:${BUILD_NUMBER}
                 docker rmi manbokcompany/spring-petclinic:latest
