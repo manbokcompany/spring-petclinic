@@ -35,7 +35,7 @@ pipeline {
         //Docker 이미지를 Docker Bub로 Push
         stage('Docker Push') {
             steps {
-                sh 'echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USER} --password-stdin'
+                sh 'echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin'
                 sh 'docker push manbokcompany/spring-petclinic:latest'
             }
         }
@@ -67,7 +67,7 @@ pipeline {
                 remoteDirectory: '', 
                 remoteDirectorySDF: false, 
                 removePrefix: 'target', 
-                sourceFiles: 'target/*.jar')], 
+                sourceFiles: '')], 
                 usePromotionTimestamp: false,
                 useWorkspaceInPromotion: false, 
                 verbose: false)])
