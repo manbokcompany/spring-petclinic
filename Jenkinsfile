@@ -44,7 +44,7 @@ pipeline {
             step {
                 sh '''
                 docker rmi spring-petclinic:${BUILD_NUMBER}
-                docker rmi manbokcompany spring-petclinic:latest
+                docker rmi manbokcompany/spring-petclinic:latest
                 '''
             }
         }
