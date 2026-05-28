@@ -1,14 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata: 
-  name: jenkins-service
-  namespace: jenkins-team2
-spec:
+  name: petclinic-service
+  namespace: petclinic-team2
+spec:  
   selector:
-    app: jenkins
+    app: petclinic
   type: ClusterIP
   ports:
   - protocol: TCP
     port: 80
-    targetPort: 8080
+    targetPort: 8080 
+
    
