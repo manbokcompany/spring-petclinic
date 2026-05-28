@@ -64,8 +64,8 @@ pipeline {
         stage('Docker Clean') {
             steps {
                 sh '''
-                docker rmi spring-petclinic:${BUILD_NUMBER}
-                docker rmi manbokcompany/spring-petclinic:${BUILD_NUMBER}
+                docker rmi ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                docker rmi ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest
                 '''
             }
         }
