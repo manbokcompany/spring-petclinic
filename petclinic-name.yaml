@@ -1,4 +1,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: jenkins-team2
+  name: petclinic-team2
