@@ -51,10 +51,10 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh '''
-                        kubectl apply -f petclinic-deployment.yaml
-                        kubectl apply -f petclinic-ingress.yaml
-                        kubectl apply -f petclinic-name.yaml
-                        kubectl apply -f petclinic-service.yaml
+                        kubectl apply -f k8s/kpetclinic-deployment.yaml
+                        kubectl apply -f k8s/petclinic-ingress.yaml
+                        kubectl apply -f k8s/petclinic-name.yaml
+                        kubectl apply -f k8s/petclinic-service.yaml
                         kubectl rollout status deployment/petclinic -n petclinic-team2
                     '''
                 }
