@@ -1,45 +1,66 @@
 pipeline {
     agent any
-
-    tools {
-        jdk 'JDK21'
-        maven 'M3'
-    }
-
+    
     environment {
-        DOCKERHUB_CRED = credentials('dockerCredential')
+        DOCKER_HUB_USER = 'manbokcompany'
+        IMAGE_NAME = 'spring-petclinic'
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
+    
     stages {
-        // Github에서 소스코드 가져오기
         stage('Git Clone') {
             steps {
-                echo 'Git Clone'
-                git url: 'https://github.com/manbokcompany/spring-petclinic.git', 
-                branch: 'main'
+                git branch: 'main',
+                    url: 'https://github.com/manbokcompany/spring-petclinic.git'
+            }
+        }
+        
+        stage('Maven Build') {
+            steps {
+                sh './mvnw package -DskipTests'
+            }
+        }
+        
+        stage('Docker Build') {
+            steps {
+                sh """
+                    docker build -t ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} .
+                    docker tag ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} \
+                               ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest
+                """
+            }
+        }
+        
+        stage('Docker Push') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh """
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest
+                    """
+                }
             }
         }
 
-        // Maven으로 Build
-        stage('Maven Build') {
-                steps {
-                sh 'mvn -Dmaven.test.failure.ignore=true clean package'
-            }
-        }
-        //Docker 이미지 생성
-        stage('Docker Build') {
+        stage('Deploy') {
             steps {
-                sh 'docker build -t spring-petclinic:${BUILD_NUMBER} .'
-                sh 'docker tag spring-petclinic:${BUILD_NUMBER} manbokcompany/spring-petclinic:latest'
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh '''
+                        kubectl apply -f petclinic-deployment.yaml
+                        kubectl apply -f petclinic-ingress.yaml
+                        kubectl apply -f petclinic-name.yaml
+                        kubectl apply -f petclinic-service.yaml
+                        kubectl rollout status deployment/petclinic -n petclinic-team2
+                    '''
+                }
             }
         }
-        //Docker 이미지를 Docker Bub로 Push
-        stage('Docker Push') {
-            steps {
-                sh 'echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin'
-                sh 'docker push manbokcompany/spring-petclinic:latest'
-            }
-        }
-        //Docker 이미지 삭제
+
         stage('Docker Clean') {
             steps {
                 sh '''
@@ -48,30 +69,12 @@ pipeline {
                 '''
             }
         }
-        //Docker Hub로 이용한 배포
-        stage('Docker Deploy') {
-            steps {
-                sshPublisher(publishers: [sshPublisherDesc(configName: 'target', 
-                transfers: [sshTransfer(cleanRemote: false, 
-                excludes: '', 
-                execCommand: '''
-                docker rm -f $(docker ps -aq)
-                docker rmi $(docker images -q)
-                docker run -itd -p 80:8080 --name=spring-petclinic manbokcompany/spring-petclinic:latest             
-                ''', 
-                execTimeout: 120000,
-                flatten: false, 
-                makeEmptyDirs: false, 
-                noDefaultExcludes: false, 
-                patternSeparator: '[, ]+', 
-                remoteDirectory: '', 
-                remoteDirectorySDF: false, 
-                removePrefix: 'target', 
-                sourceFiles: '')], 
-                usePromotionTimestamp: false,
-                useWorkspaceInPromotion: false, 
-                verbose: false)])
-            }
+
+    }  // ← stages 닫기
+
+    post {
+        always {
+            sh 'docker logout'
         }
     }
-}
+}  // ← pipeline 닫기
