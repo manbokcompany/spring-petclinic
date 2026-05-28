@@ -1,18 +1,18 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: jenkins-ingress
-  namespace: jenkins-team2
+  name: petclinic-ingress
+  namespace: petclinic-team2
 spec:
   ingressClassName: nginx
   rules:
-  - host: jenkins.team2.com
-    http: 
+  - host: petclinic.team2.com
+    http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: jenkins-service
+            name: petclinic-service
             port:
-              number: 80  
+              number: 80
