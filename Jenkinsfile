@@ -48,16 +48,15 @@ pipeline {
         }
 
         stage('Deploy') {
-            steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+            steps { 
                     sh '''
+                        sed -i 's/latest/${BUILD_NUMBER}/g' k8s/petclinic-deployment.yaml
                         kubectl apply -f k8s/petclinic-deployment.yaml
                         kubectl apply -f k8s/petclinic-ingress.yaml
                         kubectl apply -f k8s/petclinic-name.yaml
                         kubectl apply -f k8s/petclinic-service.yaml
                         kubectl rollout status deployment/petclinic -n petclinic-team2
                     '''
-                }
             }
         }
 
