@@ -50,7 +50,7 @@ pipeline {
         stage('Deploy') {
             steps { 
                     sh '''
-                        sed -i 's/latest/${BUILD_NUMBER}/g' k8s/petclinic-deployment.yaml
+                        sed -i "s/latest/${BUILD_NUMBER}/g" k8s/petclinic-deployment.yaml
                         kubectl apply -f k8s/petclinic-deployment.yaml
                         kubectl apply -f k8s/petclinic-ingress.yaml
                         kubectl apply -f k8s/petclinic-name.yaml
