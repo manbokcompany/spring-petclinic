@@ -1,5 +1,5 @@
 version: '3.9'
-service:
+services:
   spring-petclinic:
     image: s4616/spring-petclinic:latest
     container_name: spring-petclinic
