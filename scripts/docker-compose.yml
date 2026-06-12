@@ -1,0 +1,8 @@
+version: '3.9'
+service:
+  spring-petclinic:
+    image: manbokcompany/spring-petclinic:latest
+    container_name: spring-petclinic
+    ports:
+      - "80:8080"
+      
