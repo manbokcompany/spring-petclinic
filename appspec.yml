@@ -15,7 +15,7 @@ hooks:
     - location: scripts/stop_process.sh
       timeout: 100
       runas: ubuntu
-  ApplicationStop:
-      - location: scripts/start_process.sh
+  ApplicationStart:
+    - location: scripts/start_process.sh
       timeout: 100
       runas: ubuntu
