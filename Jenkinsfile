@@ -1,79 +1,47 @@
-pipeline {
+pipeline {  
     agent any
-    
-    environment {
-        DOCKER_HUB_USER = 'manbokcompany'
-        IMAGE_NAME = 'spring-petclinic'
-        IMAGE_TAG = "${BUILD_NUMBER}"
+
+    tools {
+        jdk 'JDK21'
+        maven 'M3'
     }
-    
+    environment {
+        DOCKERHUB_CRED = credentials('dockerCredentials')
+        AWS_CREDENTIAL_NAME = 'awsCredentials'
+    }
+
     stages {
         stage('Git Clone') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/manbokcompany/spring-petclinic.git'
+                git url: 'https://github.com/manbokcompany/spring-petclinic.git' ,
+                branch: 'main', credentialsId: 'gitCredentials'
             }
         }
-        
         stage('Maven Build') {
             steps {
-                sh './mvnw package -DskipTests'
+
             }
         }
-        
-        stage('Docker Build') {
+        stage('Upload S3') {
             steps {
-                sh """
-                    docker build -t ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} .
-                    docker tag ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} \
-                               ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest
-                """
+
             }
         }
-        
-        stage('Docker Push') {
+        stage('Upload S3') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-credentials',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh """
-                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                        docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
-                        docker push ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest
-                    """
-                }
+
             }
         }
-
-        stage('Deploy') {
-            steps { 
-                    sh '''
-                        sed -i "s/latest/${BUILD_NUMBER}/g" k8s/petclinic-deployment.yaml
-                        kubectl apply -f k8s/petclinic-deployment.yaml
-                        kubectl apply -f k8s/petclinic-ingress.yaml
-                        kubectl apply -f k8s/petclinic-name.yaml
-                        kubectl apply -f k8s/petclinic-service.yaml
-                        kubectl rollout status deployment/petclinic -n petclinic-team2
-                    '''
-            }
-        }
-
-        stage('Docker Clean') {
+        stage('Code Deploy') {
             steps {
-                sh '''
-                docker rmi ${DOCKER_HUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
-                docker rmi ${DOCKER_HUB_USER}/${IMAGE_NAME}:latest
-                '''
+
             }
         }
+        stage('Docker Image Remove') {
+            steps {
 
-    }  // ← stages 닫기
-
-    post {
-        always {
-            sh 'docker logout'
+            }
         }
     }
-}  // ← pipeline 닫기
+}
+        
