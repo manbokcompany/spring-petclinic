@@ -17,31 +17,6 @@ pipeline {
                 branch: 'main', credentialsId: 'gitCredentials'
             }
         }
-        stage('Maven Build') {
-            steps {
-
-            }
-        }
-        stage('Upload S3') {
-            steps {
-
-            }
-        }
-        stage('Upload S3') {
-            steps {
-
-            }
-        }
-        stage('Code Deploy') {
-            steps {
-
-            }
-        }
-        stage('Docker Image Remove') {
-            steps {
-
-            }
-        }
     }
 }
         
