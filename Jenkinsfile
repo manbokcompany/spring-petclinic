@@ -57,7 +57,7 @@ pipeline {
                     sh '''
                     aws deploy create-deployment-group \
                     --application-name std09-exercise \
-                    --auto-scaling-groups std09-exercise \
+                    --auto-scaling-groups std09-exercise-asg \
                     --deployment-group-name std09-exercise-${BUILD_NUMBER} \
                     --deployment-config-name CodeDeployDefault.OneAtATime \
                     --service-role-arn arn:aws:iam::491085389788:role/std09-exercise-code-deploy-role \
