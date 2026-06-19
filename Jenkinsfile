@@ -32,19 +32,25 @@ pipeline {
                 '''
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-        
+        stage('Docker image Remove') {
+            steps {
+                sh '''
+                docker rmi -f manbokcompany/spring-petclinic:latest
+                docker rmi -f spring-petclinic:${BUILD_NUMBER}
+                '''
+            }
+        }
+        stage('Upload S3') {
+            steps {
+                dir("${env.WORKSPACE}") {
+                    sh 'zip -r scripts.zip ./scripts appspec.yml'
+                    withAWS(region: "ap-northeast-2", credentials: "${AWS_CREDENTIAL_NAME}"){
+                        s3Upload(file: "scripts.zip", bucket: "std09-app.busanit.com")
+                    }
+                    sh 'rm -rf scripts.zip'  
+                }
+            }
+        }   
     }
 }
         
