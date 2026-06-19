@@ -1,8 +1,8 @@
 version: '3.9'
 services:
-  std09-myweb:
-    image: s4616/myweb:1.0
-    container_name: myweb
+  spring-petclinic:
+    image: manbokcompany/spring-petclinic:latest
+    container_name: spring-petclinic
     ports:
-      - "80:80"
+      - "80:8080"
       
