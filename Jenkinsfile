@@ -68,6 +68,9 @@ pipeline {
                     --s3-location bucket=std09-app.busanit.com, bundleType=zip, key=${zip_name}
                     '''
                     sleep(10)
+                    }
+                }
+            }
         }   
     }
 }
