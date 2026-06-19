@@ -50,6 +50,7 @@ pipeline {
                     sh 'rm -rf scripts.zip'  
                 }
             }
+        }
         stage('Code Deploy') {
             steps {
                 withAWS(region: "ap-northeast-2", credentials: "${AWS_CREDENTIAL_NAME}"){  
