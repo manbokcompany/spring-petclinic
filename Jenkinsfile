@@ -50,6 +50,24 @@ pipeline {
                     sh 'rm -rf scripts.zip'  
                 }
             }
+        stage('Code Deploy') {
+            steps {
+                withAWS(region: "ap-northeast-2", credentials: "${AWS_CREDENTIAL_NAME}"){  
+                    sh '''
+                    aws deploy create-deployment-group \
+                    --application-name std09-exercise \
+                    --auto-scaling-groups std09-exercise \
+                    --deployment-group-name std09-exercise-${BUILD_NUMBER} \
+                    --deployment-config-name CodeDeployDefault.OneAtATime \
+                    --service-role-arn std09-exercise-doe-deploy-role \
+                    '''
+                    sh '''
+                    aws deploy create-deployment --application-name std09-exercise \
+                    --deployment-config-name CodeDeployDefault.OneAtATime \
+                    --deployment-group-name std09-exercise-${BUILD_NUMBER} \
+                    --s3-location bucket=std09-app.busanit.com, bundleType=zip, key=${zip_name}
+                    '''
+                    sleep(10)
         }   
     }
 }
